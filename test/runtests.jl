@@ -1,6 +1,5 @@
 using Test
-using ImageMagick
-using ImageInTerminal, Images, TestImages,  ColorTypes, FixedPointNumbers
+using ImageInTerminal, TestImages, ImageCore, ImageTransformations
 using Random
 
 if isinteractive()
@@ -53,6 +52,7 @@ end
     A = ones(30,30)
     @test_reference "references/string2.txt" @io2str show(IOContext(::IO, :limit=>true, :displaysize=>(5,5)), A)
     @test_reference "references/string3.txt" 1337
+    @test_reference "references/string3.txt" 1338 by=(ref, x)->isapprox(ref, x; atol=10)
     @test_reference "references/string4.txt" @io2str show(::IO, MIME"text/plain"(), Int64.(collect(1:5)))
 
     @test_reference "references/string5.txt" """
@@ -109,6 +109,7 @@ end
 
 @testset "images as PNG" begin
     @test_reference "references/camera.png" imresize(camera, (64,64))
+    @test_reference "references/camera.png" imresize(camera, (64,64)) by=psnr_equality(25)
     @test_throws Exception @test_reference "references/wrongfilename.png" imresize(camera, (64,64))
     @test_throws ErrorException @test_reference "references/camera.png" imresize(lena, (64,64))
 end
